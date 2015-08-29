@@ -1,22 +1,10 @@
 # samjs-mongo-configwise
 
 A module for the mongo plugin for samjs.
-Exposes a model for each entries of a given config item.
+Exposes a model for each entry of a given config item.
 
 ## Example
 ```coffee
-samjs = require "samjs"
-samjs.configs()
-.models({
-  name:"testModel"
-  db:"mongo",
-  plugins:
-    configwise:
-      configName: "testConfig"
-  schema:
-    name: String
-})
-.startup().io.listen(port)
 samjs.plugins(require("samjs-mongo"),require("samjs-mongo-configwise"))
 .options({config:"config.json"})
 .configs({name:"someConfig",read:true,write:true})
