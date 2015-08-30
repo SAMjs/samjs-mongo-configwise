@@ -59,13 +59,13 @@ describe "samjs", ->
         samjs.configs.testConfig._set [{name:"first"},{name:"second"}]
         .then ->
           Object.keys(samjs.models.testModel.interfaces).length.should.equal 2
-          should.exist samjs.models.testModel.interfaces.testModelfirst
-          should.exist samjs.models.testModel.interfaces.testModelsecond
+          should.exist samjs.models.testModel.interfaces["first.testModel"]
+          should.exist samjs.models.testModel.interfaces["second.testModel"]
           done()
       it "should work with two interfaces", (done) ->
         client.plugins(samjsMongoClient)
-        modelfirst = new client.Mongo("testModelfirst")
-        modelsecond = new client.Mongo("testModelsecond")
+        modelfirst = new client.Mongo("first.testModel")
+        modelsecond = new client.Mongo("second.testModel")
         modelfirst.insert({name:"test"})
         .then -> modelsecond.insert({name:"test2"})
         .then -> modelfirst.find()
@@ -80,20 +80,20 @@ describe "samjs", ->
         samjs.configs.testConfig._set [{name:"first"}]
         .then ->
           Object.keys(samjs.models.testModel.interfaces).length.should.equal 1
-          should.exist samjs.models.testModel.interfaces.testModelfirst
-          should.not.exist samjs.models.testModel.interfaces.testModelsecond
+          should.exist samjs.models.testModel.interfaces["first.testModel"]
+          should.not.exist samjs.models.testModel.interfaces["second.testModel"]
           done()
       it "should and not work on client anymore", (done) ->
-        modelsecond = new client.Mongo("testModelsecond")
+        modelsecond = new client.Mongo("second.testModel")
         modelsecond.find()
         .catch -> done()
       it "should remove entrys", (done) ->
         samjs.configs.testConfig._set [{name:"first"},{name:"second"}]
         .then ->
-          modelsecond = new client.Mongo("testModelsecond")
+          modelsecond = new client.Mongo("second.testModel")
           modelsecond.remove()
         .then ->
-          modelfirst = new client.Mongo("testModelfirst")
+          modelfirst = new client.Mongo("first.testModel")
           modelfirst.remove()
         .then -> done()
         .catch done

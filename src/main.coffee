@@ -7,31 +7,38 @@ module.exports = (samjs) ->
         propName ?= "name"
         processConfig = (config) ->
           return unless samjs.util.isArray config
-          names = []
-          newNames = []
+          names =
+            m: []
+            i: []
+            newA: []
           for entry in config
             if samjs.util.isObject(entry) and entry[propName]?
-              confname = entry[propName]
-              names.push confname
-              unless @dbModels[confname]?
-                @dbModels[confname] =
-                  samjs.mongo.mongoose.model @name+confname, @schema
-                for iname,generator of @interfaceGenerators
-                  @interfaces[iname+confname] = generator(confname)
-                newNames.push confname
-          for confname, model of @dbModels
-            if names.indexOf(confname) < 0 # something got deleted
-              delete @dbModels[confname]
-              delete @interfaces[@name+confname]
+              addname = entry[propName]
+              for mname,generator of @dbModelGenerators
+                name = addname+"."+mname
+                @dbModels[name] ?= generator.bind(@)(addname)
+                names.m.push name
+              newName = false
               for iname,generator of @interfaceGenerators
-                @removeInterface[iname+confname]()
-                delete @removeInterface[iname+confname]
+                name = addname+"."+iname
+                newName = true unless @interfaces[name]?
+                @interfaces[name] ?= generator(addname)
+                names.i.push name
+              names.newA.push addname if newName
+          for name, model of @dbModels
+            if names.m.indexOf(name) < 0
+              delete @dbModels[name]
+          for name, iface of @interfaces
+            if names.i.indexOf(name) < 0
+              @removeInterface[name]()
+              delete @interfaces[name]
+              delete @removeInterface[name]
           unless samjs.started.isPending()
-            for confname in newNames
+            for addname in names.newA
               for iname,generator of @interfaceGenerators
-                @removeInterface[iname+confname] =
-                  samjs.exposeInterface(@name+confname,
-                                        @interfaces[iname+confname].bind(@))
+                name = addname+"."+iname
+                @removeInterface[name] =
+                  samjs.exposeInterface(name,@interfaces[name].bind(@))
         #replace startup
         @startup = ->
           samjs.on options.configName+".updated", processConfig.bind(@)

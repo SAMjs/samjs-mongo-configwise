@@ -24,6 +24,6 @@ samjs.plugins(require "samjs-mongo-client")
 samjs.config.set "someConfig", [name:"first",name:"second"]
 .then ->
   # two independet tables with the same schema
-  someModelfirst = new samjs.Mongo("someModelfirst")
-  someModelsecond = new samjs.Mongo("someModelsecond")
+  someModelfirst = new samjs.Mongo("first.someModel")
+  someModelsecond = new samjs.Mongo("second.someModel")
 ```
